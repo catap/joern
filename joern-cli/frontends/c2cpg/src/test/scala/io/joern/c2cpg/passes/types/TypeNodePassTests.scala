@@ -260,6 +260,35 @@ class TypeNodePassTests extends C2CpgSuite {
       cpg.local.nameExact("i").typeFullName.l shouldBe List("volatile int")
     }
 
+    "preserve volatile pointer qualifiers" in {
+      val cpg = code("""
+          |void func(void * volatile parameter) {
+          |  void * volatile pointer;
+          |  void * volatile *nested;
+          |  void *ordinary;
+          |  pointer = parameter;
+          |  nested = &pointer;
+          |}""".stripMargin)
+      cpg.parameter.nameExact("parameter").typeFullName.l shouldBe List("void*volatile")
+      cpg.local.nameExact("pointer").typeFullName.l shouldBe List("void*volatile")
+      cpg.local.nameExact("nested").typeFullName.l shouldBe List("void* volatile *")
+      cpg.local.nameExact("ordinary").typeFullName.l shouldBe List("void*")
+      cpg.identifier.nameExact("pointer").typeFullName.distinct.l shouldBe List("void*volatile")
+    }
+
+    "preserve volatile pointer typedef metadata" in {
+      val cpg = code("""
+          |typedef void * volatile volatile_pointer;
+          |typedef volatile_pointer pointer_alias;
+          |void func(pointer_alias parameter) {
+          |  pointer_alias pointer;
+          |}""".stripMargin)
+      cpg.typeDecl.nameExact("volatile_pointer").aliasTypeFullName.l shouldBe List("void*volatile")
+      cpg.typeDecl.nameExact("pointer_alias").aliasTypeFullName.l shouldBe List("void*volatile")
+      cpg.parameter.nameExact("parameter").typeFullName.l shouldBe List("pointer_alias")
+      cpg.local.nameExact("pointer").typeFullName.l shouldBe List("pointer_alias")
+    }
+
     "be correct for referenced types from locals" in {
       val cpg = code("""
           |struct flex {

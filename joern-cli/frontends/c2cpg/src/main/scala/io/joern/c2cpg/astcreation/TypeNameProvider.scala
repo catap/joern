@@ -413,6 +413,7 @@ trait TypeNameProvider { this: AstCreator =>
         .map {
           case r: ICPPASTReferenceOperator if r.isRValueReference => "&&"
           case _: ICPPASTReferenceOperator                        => "&"
+          case p: IASTPointer if p.isVolatile                     => "* volatile "
           case _: IASTPointer                                     => "*"
         }
         .mkString("")
