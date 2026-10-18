@@ -472,7 +472,7 @@ trait AstForExpressionsCreator { this: AstCreator =>
 
   private def astForCastExpression(castExpression: IASTCastExpression): Ast = {
     val op                = Operators.cast
-    val tpe               = typeFor(castExpression.getTypeId.getDeclSpecifier)
+    val tpe               = typeForDeclSpecifier(castExpression.getTypeId.getDeclSpecifier)
     val cpgCastExpression = callNode(
       castExpression,
       code(castExpression),

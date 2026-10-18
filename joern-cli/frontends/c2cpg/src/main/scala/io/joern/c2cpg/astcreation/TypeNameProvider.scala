@@ -63,6 +63,7 @@ trait TypeNameProvider { this: AstCreator =>
   private def parentDeclaratorAt(node: IASTNode, index: Int): Option[IASTDeclarator] =
     node.getParent match {
       case declaration: IASTSimpleDeclaration => declaratorAt(declaration, index)
+      case typeId: IASTTypeId                 => Option(typeId.getAbstractDeclarator)
       case _                                  => None
     }
 

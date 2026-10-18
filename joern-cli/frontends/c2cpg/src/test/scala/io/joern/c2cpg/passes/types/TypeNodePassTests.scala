@@ -228,6 +228,18 @@ class TypeNodePassTests extends C2CpgSuite {
       }
     }
 
+    "preserve pointer cast target types" in {
+      val cpg = code("""
+        |void func(void) {
+        |  void *pointer = (void *)0;
+        |  int **nested = (int **)pointer;
+        |}
+        |""".stripMargin)
+
+      cpg.call.nameExact(Operators.cast).typeFullName.toSet shouldBe Set("void*", "int**")
+      cpg.call.nameExact(Operators.cast).argument(1).isTypeRef.typeFullName.toSet shouldBe Set("void*", "int**")
+    }
+
     "be correct for volatile types" in {
       val cpg = code("""
           |void func(void) {
